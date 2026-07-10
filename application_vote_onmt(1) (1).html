@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vote - Deuxième Session Ordinaire de l'ONMT</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #eef4ff, #ffffff);
+      color: #1f2937;
+    }
+    .container {
+      max-width: 920px;
+      margin: 30px auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+    .header {
+      background: #0f4c81;
+      color: white;
+      padding: 30px 35px;
+      text-align: center;
+    }
+    .header h1 { margin: 0; font-size: 28px; text-transform: uppercase; }
+    .header h2 { margin: 8px 0 0; font-size: 18px; font-weight: normal; }
+    .content { padding: 32px 36px; }
+    .notice {
+      background: #f0f7ff;
+      border-left: 6px solid #0f4c81;
+      padding: 16px 18px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    label { font-weight: bold; display: block; margin: 16px 0 6px; }
+    input, select {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      font-size: 15px;
+    }
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin: 24px 0;
+    }
+    .choice {
+      border: 2px solid #d1d5db;
+      border-radius: 14px;
+      padding: 22px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.25s;
+      background: #fafafa;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .choice:hover, .choice.selected {
+      border-color: #0f4c81;
+      background: #eaf3ff;
+      transform: translateY(-2px);
+    }
+    button {
+      background: #0f4c81;
+      color: white;
+      border: none;
+      padding: 14px 22px;
+      border-radius: 9px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    button:hover { background: #0b3b65; }
+    .secondary { background: #6b7280; margin-left: 8px; }
+    .secondary:hover { background: #4b5563; }
+    .results {
+      margin-top: 32px;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 24px;
+    }
+    .bar-wrap { margin: 18px 0; }
+    .bar-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; }
+    .bar-bg { background: #e5e7eb; border-radius: 20px; overflow: hidden; height: 28px; }
+    .bar { background: #0f4c81; height: 100%; width: 0%; color: white; text-align: center; line-height: 28px; font-weight: bold; transition: width 0.4s ease; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; }
+    th { background: #f3f4f6; }
+    .footer {
+      text-align: center;
+      color: #6b7280;
+      font-size: 13px;
+      padding: 18px;
+      background: #f9fafb;
+    }
+    @media(max-width: 700px){
+      .choices { grid-template-columns: 1fr; }
+      .content { padding: 24px 18px; }
+      .header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Ordre National des Médecins du Tchad</h1>
+      <h2>Consultation des Conseillers Nationaux pour le choix de la date de la Deuxième Session Ordinaire</h2>
+    </div>
+
+    <div class="content">
+      <div class="notice">
+        Compte tenu des contraintes organisationnelles et des réalités liées à la saison des pluies, le Bureau Exécutif invite chaque Conseiller National à choisir une seule date parmi les deux propositions ci-dessous.
+      </div>
+
+      <label for="nom">Nom et prénom du Conseiller National</label>
+      <input type="text" id="nom" placeholder="Exemple : Dr. Nom Prénom" />
+
+      <label>Choix de la date</label>
+      <div class="choices">
+        <div class="choice" onclick="selectDate('Samedi 15 août 2026', this)">Samedi 15 août 2026</div>
+        <div class="choice" onclick="selectDate('Samedi 19 septembre 2026', this)">Samedi 19 septembre 2026</div>
+      </div>
+
+      <button onclick="submitVote()">Valider mon vote</button>
+      <button class="secondary" onclick="exportCSV()">Exporter les résultats</button>
+      <button class="secondary" onclick="resetVotes()">Réinitialiser</button>
+
+      <div class="results">
+        <h2>Résultats provisoires automatisés</h2>
+        <p><strong>Total des votes :</strong> <span id="totalVotes">0</span></p>
+
+        <div class="bar-wrap">
+          <div class="bar-label"><span>Samedi 15 août 2026</span><span id="countA">0 vote</span></div>
+          <div class="bar-bg"><div class="bar" id="barA">0%</div></div>
+        </div>
+
+        <div class="bar-wrap">
+          <div class="bar-label"><span>Samedi 19 septembre 2026</span><span id="countB">0 vote</span></div>
+          <div class="bar-bg"><div class="bar" id="barB">0%</div></div>
+        </div>
+
+        <h3>Liste des votants</h3>
+        <table>
+          <thead>
+            <tr><th>N°</th><th>Nom et prénom</th><th>Date choisie</th><th>Date et heure du vote</th></tr>
+          </thead>
+          <tbody id="voteTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer">
+      Bureau Exécutif de l'ONMT — Application locale de consultation automatisée
+    </div>
+  </div>
+
+  <script>
+    let selectedDate = '';
+    let votes = JSON.parse(localStorage.getItem('votesONMT')) || [];
+
+    function selectDate(date, element) {
+      selectedDate = date;
+      document.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+      element.classList.add('selected');
+    }
+
+    function submitVote() {
+      const nom = document.getElementById('nom').value.trim();
+      if (!nom) { alert('Veuillez saisir le nom et prénom du Conseiller National.'); return; }
+      if (!selectedDate) { alert('Veuillez choisir une date.'); return; }
+
+      const alreadyVoted = votes.some(v => v.nom.toLowerCase() === nom.toLowerCase());
+      if (alreadyVoted) { alert('Ce Conseiller National a déjà voté.'); return; }
+
+      votes.push({ nom: nom, choix: selectedDate, heure: new Date().toLocaleString('fr-FR') });
+      localStorage.setItem('votesONMT', JSON.stringify(votes));
+      document.getElementById('nom').value = '';
+      selectedDate = '';
+      document.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+      updateResults();
+      alert('Votre vote a été enregistré avec succès.');
+    }
+
+    function updateResults() {
+      const countA = votes.filter(v => v.choix === 'Samedi 15 août 2026').length;
+      const countB = votes.filter(v => v.choix === 'Samedi 19 septembre 2026').length;
+      const total = votes.length;
+      const pctA = total ? Math.round((countA / total) * 100) : 0;
+      const pctB = total ? Math.round((countB / total) * 100) : 0;
+
+      document.getElementById('totalVotes').textContent = total;
+      document.getElementById('countA').textContent = countA + (countA > 1 ? ' votes' : ' vote');
+      document.getElementById('countB').textContent = countB + (countB > 1 ? ' votes' : ' vote');
+      document.getElementById('barA').style.width = pctA + '%';
+      document.getElementById('barA').textContent = pctA + '%';
+      document.getElementById('barB').style.width = pctB + '%';
+      document.getElementById('barB').textContent = pctB + '%';
+
+      const tbody = document.getElementById('voteTable');
+      tbody.innerHTML = '';
+      votes.forEach((v, i) => {
+        tbody.innerHTML += `<tr><td>${i+1}</td><td>${v.nom}</td><td>${v.choix}</td><td>${v.heure}</td></tr>`;
+      });
+    }
+
+    function exportCSV() {
+      if (votes.length === 0) { alert('Aucun vote à exporter.'); return; }
+      let csv = 'N°;Nom et prénom;Date choisie;Date et heure du vote\n';
+      votes.forEach((v, i) => {
+        csv += `${i+1};${v.nom};${v.choix};${v.heure}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'resultats_vote_ONMT.csv';
+      link.click();
+    }
+
+    function resetVotes() {
+      if (confirm('Voulez-vous vraiment réinitialiser tous les votes ?')) {
+        votes = [];
+        localStorage.removeItem('votesONMT');
+        updateResults();
+      }
+    }
+
+    updateResults();
+  </script>
+</body>
+</html>
